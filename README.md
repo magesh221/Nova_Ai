@@ -15,7 +15,7 @@ Nova AI Backend is an Express.js API backed by MongoDB. It handles authenticatio
 
 ## Requirements
 
-- Node.js 20.9 or newer (Node.js 22 LTS recommended)
+- Node.js 20.19 or newer (Node.js 22 recommended)
 - MongoDB 6.0 or newer
 - An API key and model from an OpenAI-compatible AI provider
 - SMTP credentials for password reset emails
@@ -48,10 +48,21 @@ Keep all secrets in the backend environment. Never commit `.env` files.
 
 ```bash
 npm install
-npm run loc
+npm start
 ```
 
-The API listens on port `8690` by default.
+For local development with automatic restarts, run `npm run loc`. The production start command is `npm start`. The server binds to all network interfaces and uses the platform-provided `PORT`, falling back to `8690` locally.
+
+## Deployment with Docker
+
+Build and run the production image (configure the required environment variables from the section above in your hosting platform; do not copy `.env` into the image):
+
+```bash
+docker build -t nova-ai-api .
+docker run --rm -p 8690:8690 --env-file .env -e PORT=8690 nova-ai-api
+```
+
+For a cloud platform that builds from this repository, use `npm ci --omit=dev` as the install command and `npm start` as the start command. Set a Node.js 22 runtime and configure the required variables in the platform's secret/environment settings. The HTTP server starts before MongoDB finishes connecting and retries database connection every five seconds; configure the health check to use `/api/v1/ready`, which returns `503` until MongoDB is connected. `/api/v1/health` only reports that the HTTP process is alive.
 
 ## API Routes
 
